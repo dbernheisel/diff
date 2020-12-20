@@ -76,8 +76,10 @@ defmodule Diff.Hex do
     try do
       with {:ok, tarball_from} <- get_tarball(package, from),
            :ok <- unpack_tarball(tarball_from, path_from),
+           :ok <- Diff.Package.GeneratorDiff.generate_app(package, path_from),
            {:ok, tarball_to} <- get_tarball(package, to),
            :ok <- unpack_tarball(tarball_to, path_to),
+           :ok <- Diff.Package.GeneratorDiff.generate_app(package, path_to),
            :ok <- git_diff(path_from, path_to, path_diff) do
         stream =
           File.stream!(path_diff, [:read_ahead])
