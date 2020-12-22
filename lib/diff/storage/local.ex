@@ -34,6 +34,10 @@ defmodule Diff.Storage.Local do
     end
   end
 
+  def combined_checksum("HexDiffGenerator|" <> package_id, from, to) do
+    [package, _id] = String.split(package_id, "|", parts: 2)
+    combined_checksum(package, from, to)
+  end
   def combined_checksum(package, from, to) do
     with {:ok, checksums} <- Diff.Hex.get_checksums(package, [from, to]) do
       {:ok, :erlang.phash2({Application.get_env(:diff, :cache_version), checksums})}

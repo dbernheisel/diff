@@ -11,6 +11,10 @@ html, body {
   background-color: #3e424d;
 }
 
+.hidden {
+  display: none;
+}
+
 .header {
   display: flex;
   align-items: center;

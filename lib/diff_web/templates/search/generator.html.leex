@@ -1,0 +1,103 @@
+<div class="search-area">
+  <form phx-change="select_package" phx-submit="go" class="search-form">
+    <div class="select-area">
+      <select
+        autocomplete="off"
+        autofocus
+        name="package"
+        value="<%= @package %>"
+        placeholder="Select Package..."
+        >
+        <option selected value="" disabled>Select package...</option>
+        <%= for package <- generator_package_options() do %>
+          <option <%= selected(package, @package) %> value="<%= package %>"><%= package %></option>
+        <% end %>
+      </select>
+    </div>
+  </form>
+
+  <form <%= hidden(@package) %> phx-change="select_version" class="version-form">
+    <div class="version-area">
+      <div class="select-area">
+        <label for="from">From</label>
+        <select name="from">
+          <%= for release_from <- @from_releases do %>
+            <option <%= selected(@from, release_from) %> value="<%= release_from %>"><%= release_from %></option>
+          <% end %>
+        </select>
+        <label for="to">To</label>
+        <select name="to">
+          <%= for release_to <- @to_releases do %>
+            <option <%= selected(@to, release_to) %> value="<%= release_to %>"><%= release_to %></option>
+          <% end %>
+        </select>
+      </div>
+    </div>
+  </form>
+
+  <form <%= hidden(@package) %> phx-change="select_generator" phx-submit="go" class="search-form">
+    <label for="generator">Generator</label>
+    <div class="select-area">
+      <select
+        autocomplete="off"
+        autofocus
+        name="generator"
+        value="<%= @generator %>"
+        placeholder="Select Generator..."
+        >
+
+        <option selected value="" disabled>Select generator command...</option>
+        <%= for generator <- generator_options(@package) do %>
+          <option <%= selected(generator, @generator) %> value="<%= generator %>"><%= generator %></option>
+        <% end %>
+      </select>
+    </div>
+  </form>
+
+  <form <%= hidden(@generator) %> phx-change="select_flags">
+    <div class="version-area">
+      <div <%= hidden(@flags) %>>
+        <label>Flags</label>
+
+        <div class="container">
+
+          <div class="row">
+            <div class="column"><%= @from %></div>
+            <div class="column"><%= @to %></div>
+          </div>
+
+          <div class="row">
+            <div class="column select-area">
+              <ul>
+              <%= for flag <- flag_options(@package, @generator) do %>
+                <li>
+                  <input <%= checked(flag, @from_flags) %> id="from_flags_<%= flag %>" name="from_flags[<%= flag %>]" type="checkbox" value="true">
+                  <label class="label-inline" for="from_flags_<%= flag %>"><%= flag %></label>
+                </li>
+              <% end %>
+              </ul>
+            </div>
+
+            <div class="column select-area">
+              <ul>
+              <%= for flag <- flag_options(@package, @generator) do %>
+                <li>
+                  <input <%= checked(flag, @to_flags) %> id="to_flags_<%= flag %>" name="to_flags[<%= flag %>]" type="checkbox" value="true">
+                  <label class="label-inline" for="to_flags_<%= flag %>"><%= flag %></label>
+                </li>
+              <% end %>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <button
+        class="diff-button"
+        type="button"
+        <%= disabled([@from, @to, @generator, @package]) %>
+        phx-click="go"
+      >Diff</button>
+    </div>
+  </form>
+</div>

@@ -28,6 +28,27 @@ defmodule DiffWeb.PageController do
     end
   end
 
+  def generator_diff(conn, %{"package" => package, "id" => id, "versions" => versions}) do
+    package_id = Diff.GeneratorOutput.build_id(package, id)
+
+    with {:ok, from, to} <- parse_versions(versions),
+         {:ok, stream} <- Diff.Storage.get(package_id, to_string(from), to_string(to)) do
+      Logger.debug("cache hit for #{id}")
+
+      conn
+      |> put_resp_content_type("text/html")
+      |> stream_diff(stream)
+    else
+      :error ->
+        render_error(conn, 404)
+      {:error, :not_found} ->
+        # Don't try to build it. It'll be too slow and requires runtime execution.
+        Logger.debug("cache miss for #{package_id}")
+        redirect(conn, to: "/generator")
+    end
+  end
+
+
   defp maybe_cached_diff(conn, _package, version, version) do
     render_error(conn, 400)
   end
@@ -127,7 +148,7 @@ defmodule DiffWeb.PageController do
     end)
   end
 
-  defp render_diff(package, from, to, stream) do
+  def render_diff(package, from, to, stream) do
     path = tmp_path("html-#{package}-#{from}-#{to}-")
 
     File.open!(path, [:write, :raw, :binary, :write_delay], fn file ->
